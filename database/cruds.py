@@ -18,11 +18,23 @@ async def add_user(login: str, password: str):
         user = User(login=login, password_hash=password_hash)
         session.add(user)
         await session.commit()
+    return True
 
 async def check_user(login: str, password: str):
     async with async_session() as session:
         user = await session.execute(select(User).where(User.login==login))
         user = user.scalar_one_or_none()
         if user and check_password(password=password, hashed_password=user.password_hash):
-            return True
+            return user
         return False
+
+async def get_user_by_id(uid: int):
+    async with async_session() as session:
+        user = await session.get(User, uid)
+        return user
+
+async def get_user_id_by_login(login: str):
+    async with async_session() as session:
+        user = await session.execute(select(User).where(User.login==login))
+        user = user.scalar_one_or_none()
+        return user.id
