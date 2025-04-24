@@ -53,7 +53,6 @@ async def registration(user: UserSchema, request: Request):
         raise HTTPException(status_code=400, detail="User already exists")
 
     user_id = await get_user_id_by_login(user.login)
-    print(user_id)
     response_data = {"status": "ok"}
     response = JSONResponse(content=response_data)
     response.set_cookie(key='access_token', value=create_jwt(user_id), max_age=64000)
