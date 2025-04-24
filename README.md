@@ -1,1 +1,3 @@
-# bank_system_app
+# bank_system_app FastAPI
+
+В разработке...
