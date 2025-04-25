@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Request, Response, HTTPException
+from fastapi import APIRouter, Request, Response, HTTPException, Body
 from fastapi.responses import JSONResponse
 
 from auth.jwt_processing import create_jwt, check_jwt
-from database.cruds import add_user, check_user, get_user_by_id, get_user_id_by_login
-from schemas import UserSchema
+from database.cruds import add_user, check_user, get_user_by_id, get_user_id_by_login, add_balance
+from schemas import UserSchema, TopupSchema
 
 
 router = APIRouter()
@@ -63,8 +63,17 @@ async def send_money():
     ...
 
 @router.post('/balance/topup', tags=['balance'])
-async def top_up_balance():
-    ...
+async def top_up_balance(request: Request, amount: TopupSchema = Body()):
+    current_jwt = request.cookies.get('access_token')
+    if not current_jwt:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    uid = check_jwt(current_jwt)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    await add_balance(uid, amount.amount)
+    return {"status": "ok"}
 
 @router.post('/balance/deposit', tags=['balance'])
 async def deposit_balance():

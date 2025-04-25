@@ -38,3 +38,9 @@ async def get_user_id_by_login(login: str):
         user = await session.execute(select(User).where(User.login==login))
         user = user.scalar_one_or_none()
         return user.id
+
+async def add_balance(uid: int, amount: int):
+    async with async_session() as session:
+        user = await session.get(User, uid)
+        user.balance += amount
+        await session.commit()
