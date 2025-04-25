@@ -11,11 +11,7 @@ router = APIRouter()
 @router.get('/profile/', tags=['profile'], summary='Профиль пользователя')
 async def profile(request: Request):
     current_jwt = request.cookies.get('access_token')
-    if not current_jwt:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
-    uid = check_jwt(current_jwt)
-    if not uid:
+    if not current_jwt or not (uid := check_jwt(current_jwt)):
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     user = await get_user_by_id(uid)
@@ -65,11 +61,7 @@ async def send_money():
 @router.post('/balance/topup', tags=['balance'])
 async def top_up_balance(request: Request, amount: TopupSchema = Body()):
     current_jwt = request.cookies.get('access_token')
-    if not current_jwt:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    uid = check_jwt(current_jwt)
-    if not uid:
+    if not current_jwt or not (uid := check_jwt(current_jwt)):
         raise HTTPException(status_code=401, detail="Unauthorized")
     
     await add_balance(uid, amount.amount)
