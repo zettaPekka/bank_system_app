@@ -17,8 +17,6 @@ def create_jwt(user_id: int):
 def check_jwt(token: str):
     try:
         payload = jwt.decode(token, config.JWT_SECRET_KEY, algorithms=['HS256'])
-        print(payload)
         return payload['sub']
-    except Exception as e:
-        print(e)
+    except:
         return None

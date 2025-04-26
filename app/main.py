@@ -15,7 +15,7 @@ app = FastAPI()
 app.include_router(router)
 
 async def main():
-    config = uvicorn.Config('main:app', reload=True)
+    config = uvicorn.Config('main:app')
     server = uvicorn.Server(config)
     
     await init_database()
@@ -24,4 +24,7 @@ async def main():
     await server.serve()
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        pass

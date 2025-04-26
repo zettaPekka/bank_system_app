@@ -19,8 +19,8 @@ class Transaction(Base):
     __tablename__ = 'transactions'
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    sender_id: Mapped[int]
-    receiver_id: Mapped[int]
+    sender_login: Mapped[int]
+    receiver_login: Mapped[int]
     amount: Mapped[int]
     status: Mapped[str]
 
