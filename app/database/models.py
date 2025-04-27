@@ -30,4 +30,3 @@ class Deposit(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int]
     amount: Mapped[int]
-    end_data: Mapped[str]
