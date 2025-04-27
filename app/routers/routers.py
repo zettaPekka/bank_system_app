@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from auth.jwt_processing import create_jwt, check_jwt
 from database.cruds import add_user, check_user, get_user_by_id, get_user_id_by_login, add_balance, add_transaction_to_history
 from schemas import UserSchema, TopupSchema, SendMoneySchema
-from bank_transactions.bank_transfer_handler import add_transaction_to_queue
+from bank_transactions.producer import add_transaction_to_queue
 
 
 router = APIRouter()
@@ -82,7 +82,7 @@ async def send_money(request: Request, data: SendMoneySchema = Body()):
         raise HTTPException(status_code=400, detail='Not enough money')
     
     await add_transaction_to_history(sender.login, data.receiver_login, data.amount)
-    await add_transaction_to_queue(sender.login, data.receiver_login, data.amount)
+    add_transaction_to_queue(sender.login, data.receiver_login, data.amount)
     return {'status': 'ok', 'message': 'Transaction added to queue'}
 
 

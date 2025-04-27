@@ -72,6 +72,7 @@ async def transfer_money(sender_login: str, receiver_login: str, amount: int):
         transaction.status = 'completed'
         
         for sender_transaction in sender.history:
+            print(sender_transaction)
             if sender_transaction['status'] == 'pending':
                 sender_transaction['status'] = 'completed'
                 break
