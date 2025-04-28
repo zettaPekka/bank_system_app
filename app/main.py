@@ -5,7 +5,7 @@ import asyncio
 import logging
 
 from routers.routers import router
-from database.init_db import init_database
+from database.init_db import InitDataBase
 
 
 logging.basicConfig(level=logging.INFO)
@@ -14,7 +14,7 @@ app = FastAPI()
 app.include_router(router)
 
 async def main():
-    await init_database()
+    await InitDataBase.init_db()
 
 
 if __name__ == '__main__':
