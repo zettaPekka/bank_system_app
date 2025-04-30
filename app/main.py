@@ -4,7 +4,7 @@ import asyncio
 
 import logging
 
-from routers.routers import router
+from routers.user_router import router
 from database.init_db import InitDataBase
 
 

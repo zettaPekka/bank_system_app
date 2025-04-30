@@ -5,21 +5,22 @@ from dotenv import load_dotenv
 import json
 import os
 
-from database.database_manager import DataBaseManager
+from database.database_manager import TransactionRepository, UserRepository
 
 
-db_mngr = DataBaseManager()
+transaction_repo = TransactionRepository()
+user_repo = UserRepository()
 
 load_dotenv()
 
 async def process(ch, method, properties, body):
     value = json.loads(body)
-    current_balance = await db_mngr.get_balance_from_login(value[0])
+    current_balance = await user_repo.get_balance_from_login(value[0])
     if current_balance < value[2]:
-        await db_mngr.unsuccessful_transaction(value[0], value[1], value[2])
+        await transaction_repo.unsuccessful_transaction(value[0], value[1], value[2])
         ch.basic_ack(delivery_tag=method.delivery_tag)
         return
-    await db_mngr.transfer_money(value[0], value[1], value[2])
+    await transaction_repo.transfer_money(value[0], value[1], value[2])
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 def callback(ch, method, properties, body):

@@ -7,7 +7,7 @@ from database.models import User, Transaction
 from pass_hash import check_password, hash_password
 
 
-class DataBaseManager:
+class UserRepository:
     def __init__(self):
         self.session = async_sessionmaker(engine)
     
@@ -15,30 +15,6 @@ class DataBaseManager:
         async with self.session() as session:
             result = await session.execute(select(User).where(User.login == login))
             return result.scalar_one_or_none()
-    
-    async def _get_sender_and_receiver(self, session: AsyncSession, sender_login: str, receiver_login: str):
-        sender = await session.execute(select(User).where(User.login == sender_login))
-        sender = sender.scalar_one_or_none()
-        receiver = await session.execute(select(User).where(User.login == receiver_login))
-        receiver = receiver.scalar_one_or_none()
-        return sender, receiver
-    
-    async def _update_transaction_status_in_history(self, session: AsyncSession, user: User, new_status: str):
-        for transaction in user.history:
-                if transaction['status'] == 'pending':
-                    transaction['status'] = new_status
-                    break
-    
-    async def _get_pending_transaction(self, session: AsyncSession, sender_login: str, receiver_login: str, amount: int):
-        result = await session.execute(select(Transaction).where(
-                and_(
-                    Transaction.sender_login == sender_login, 
-                    Transaction.receiver_login == receiver_login, 
-                    Transaction.amount == amount, 
-                    Transaction.status == 'pending'
-                )
-            ))
-        return result.scalar()
     
     async def add_user(self, login: str, password: str):
         user = await self._get_user_by_login(login)
@@ -75,6 +51,34 @@ class DataBaseManager:
     async def get_balance_from_login(self, login: str):
         user = await self._get_user_by_login(login)
         return user.balance if user else None
+
+class TransactionRepository:
+    def __init__(self):
+        self.session = async_sessionmaker(engine)
+    
+    async def _get_sender_and_receiver(self, session: AsyncSession, sender_login: str, receiver_login: str):
+        sender = await session.execute(select(User).where(User.login == sender_login))
+        sender = sender.scalar_one_or_none()
+        receiver = await session.execute(select(User).where(User.login == receiver_login))
+        receiver = receiver.scalar_one_or_none()
+        return sender, receiver
+    
+    async def _update_transaction_status_in_history(self, session: AsyncSession, user: User, new_status: str):
+        for transaction in user.history:
+                if transaction['status'] == 'pending':
+                    transaction['status'] = new_status
+                    break
+    
+    async def _get_pending_transaction(self, session: AsyncSession, sender_login: str, receiver_login: str, amount: int):
+        result = await session.execute(select(Transaction).where(
+                and_(
+                    Transaction.sender_login == sender_login, 
+                    Transaction.receiver_login == receiver_login, 
+                    Transaction.amount == amount, 
+                    Transaction.status == 'pending'
+                )
+            ))
+        return result.scalar()
     
     async def transfer_money(self, sender_login: str, receiver_login: str, amount: int):
         async with self.session() as session:
