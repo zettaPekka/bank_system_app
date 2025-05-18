@@ -10,12 +10,15 @@ from bank_transactions.producer import add_transaction_to_queue
 
 router = APIRouter()
 
-user_repo = UserRepository()
-transaction_repo = TransactionRepository()
+def get_user_repository():
+    return UserRepository()
+
+def get_transaction_repository():
+    return TransactionRepository()
 
 
 @router.get('/profile/', tags=['🏠 Профиль'], summary='Профиль пользователя')
-async def profile(request: Request):
+async def profile(request: Request, user_repo: UserRepository = Depends(get_user_repository)):
     current_jwt = request.cookies.get('access_token')
     if not current_jwt or not (uid := check_jwt(current_jwt)):
         raise HTTPException(status_code=401, detail='Unauthorized')
@@ -30,7 +33,7 @@ async def profile(request: Request):
 
 
 @router.post('/login/', tags=['🔐 Аутентификация'], summary='Логин')
-async def login(user: UserSchema, request: Request):
+async def login(user: UserSchema, request: Request, user_repo: UserRepository = Depends(get_user_repository)):
     current_jwt = request.cookies.get('access_token')
     if current_jwt and check_jwt(current_jwt):
         raise HTTPException(status_code=400, detail='Already logged in')
@@ -46,7 +49,7 @@ async def login(user: UserSchema, request: Request):
 
 
 @router.post('/registration/', tags=['🔐 Аутентификация'], summary='Регистрация')
-async def registration(user: UserSchema, request: Request):
+async def registration(user: UserSchema, request: Request, user_repo: UserRepository = Depends(get_user_repository)):
     current_jwt = request.cookies.get('access_token')
     if current_jwt and check_jwt(current_jwt):
         raise HTTPException(status_code=400, detail='Already logged in')
@@ -69,7 +72,7 @@ async def logout(response: Response):
 
 
 @router.post('/balance/send/', tags=['💰 Финансы'], summary='Перевод денежных средств другому рользователю')
-async def send_money(request: Request, data: SendMoneySchema = Body()):
+async def send_money(request: Request, data: SendMoneySchema = Body(), user_repo: UserRepository = Depends(get_user_repository), transaction_repo: TransactionRepository = Depends(get_transaction_repository)):
     current_jwt = request.cookies.get('access_token')
     if not current_jwt or not (uid := check_jwt(current_jwt)):
         raise HTTPException(status_code=401, detail='Unauthorized')
@@ -92,7 +95,7 @@ async def send_money(request: Request, data: SendMoneySchema = Body()):
 
 
 @router.post('/balance/topup/', tags=['💰 Финансы'], summary='Пополнить баланс')
-async def top_up_balance(request: Request, amount: TopupSchema = Body()):
+async def top_up_balance(request: Request, amount: TopupSchema = Body(), user_repo: UserRepository = Depends(get_user_repository)):
     current_jwt = request.cookies.get('access_token')
     if not current_jwt or not (uid := check_jwt(current_jwt)):
         raise HTTPException(status_code=401, detail='Unauthorized')
