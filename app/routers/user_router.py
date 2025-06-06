@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Response, HTTPException, Body
+from fastapi import APIRouter, Request, Response, HTTPException, Body, Depends
 from fastapi.responses import JSONResponse
 
 from auth.jwt_processing import create_jwt, check_jwt
