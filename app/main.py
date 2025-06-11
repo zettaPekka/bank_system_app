@@ -14,6 +14,7 @@ app = FastAPI()
 app.include_router(router)
 
 async def main():
+    # await InitDataBase.drop_db()
     await InitDataBase.init_db()
 
 
